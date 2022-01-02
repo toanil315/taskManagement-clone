@@ -1,0 +1,15 @@
+.breadcumb {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.breadcumb p, .breadcumb .slash {
+    font-size: 15px;
+    font-weight: 500;
+    color: #5E6C94;
+    margin-bottom: 0;
+}
+
+.slash {
+    padding: 0 15px;
+}

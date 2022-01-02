@@ -1,0 +1,10 @@
+.container {
+    display: flex;
+}
+
+.content {
+    width: 84%;
+    margin: 0 30px;
+    padding-top: 30px;
+}
+

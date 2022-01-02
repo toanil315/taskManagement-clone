@@ -1,0 +1,25 @@
+.ant-select {
+    background-color: #F4F5F7;
+    border: 1px solid #DFE1E6;
+    border-radius: 3px;
+    font-size: 14px;
+    color: #172b4d;
+    font-weight: 500;
+}
+
+.ant-select-focused.ant-select {
+    background-color: white;
+    border: 1px solid rgb(76, 154, 255);
+    box-shadow: rgb(76 154 255) 0px 0px 0px 1px;
+}
+
+.ant-select-focused.ant-select .ant-select-selector {
+    box-shadow: none !important;
+}
+
+.ant-select-selector {
+    background-color: transparent !important;
+    border: 0 !important;
+}
+
+

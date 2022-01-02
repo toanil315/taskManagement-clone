@@ -1,0 +1,116 @@
+.title {
+    font-size: 24px;
+    font-weight: 500;
+    color: #172B4D;
+    margin-bottom: 30px;
+}
+
+.list {
+    display: flex;
+}
+
+.ava {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 5px;
+    background-color: #DDDDDD;
+    text-align: center;
+    transition: all 0.2s linear;
+}
+
+.ava img {
+    width: 100%;
+    border-radius: 50%;
+}
+
+.ava i {
+    font-size: 16px;
+    line-height: 30px;
+}
+
+.ava:hover {
+    transform: translateY(-5px);
+}
+
+.button {
+    border: 0;
+    outline: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    margin-right: 15px;
+    cursor: pointer;
+    transition: all 0.3s linear;
+}
+
+.button.update {
+    background-color: rgb(80, 80, 241);
+}
+
+.button.update:hover {
+    background-color: rgb(26, 26, 202);
+}
+
+.button.delete {
+    background-color: rgb(207, 31, 31);
+}
+
+.button.delete:hover {
+    background-color: rgb(180, 17, 17);
+}
+
+.cate-tag {
+    text-align: center;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+    border-radius: 10px;
+}
+
+.cate-tag.green {
+    background-color: rgb(4, 160, 4);
+}
+
+.cate-tag.blue {
+    background-color: rgb(67, 67, 218);
+}
+
+.cate-tag.red {
+    background-color: rgb(194, 8, 8);
+}
+
+.button-assign-user {
+    display: block;
+    border: 0;
+    outline: none;
+    margin-top: 10px;
+    background-color: rgb(46, 46, 224);
+    padding: 5px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s linear;
+}
+
+.button-assign-user:hover {
+    background-color: rgb(27, 27, 192);
+}
+
+@keyframes jump {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
