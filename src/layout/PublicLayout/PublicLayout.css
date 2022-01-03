@@ -3,8 +3,8 @@
 }
 
 .content {
-    width: 84%;
-    margin: 0 30px;
+    width: calc(100% - 220px);
+    padding: 0 30px;
     padding-top: 30px;
 }
 

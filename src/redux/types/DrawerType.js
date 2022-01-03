@@ -1,0 +1,3 @@
+export const SET_COMPONENT = 'SET_COMPONENT';
+export const DISPLAY_DRAWER = 'DISPLAY_DRAWER';
+export const HIDE_DRAWER = 'HIDE_DRAWER';

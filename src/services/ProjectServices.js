@@ -21,6 +21,10 @@ class ProjectServices extends BaseServices {
     assignUserToProject = (model) => {
         return this.post(`${Domain}/Project/assignUserProject`, model);
     }
+
+    updateProject = (model) => {
+        return this.put(`${Domain}/Project/updateProject?projectId=${model.id}`, model)
+    }
 }
 
 export const projectServices = new ProjectServices();

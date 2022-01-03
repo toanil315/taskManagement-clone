@@ -8,7 +8,6 @@ class UserServices extends BaseServices {
 
     getListUser = (name) => {
         if(name) {
-            console.log(`${Domain}/Users/getUser?keyword=${name}`);
             return this.get(`${Domain}/Users/getUser?keyword=${name}`);
         }
         return this.get(`${Domain}/Users/getUser`);

@@ -10,19 +10,17 @@ import {
     getProjectCategoryAction,
 } from "../../redux/actions/ProjectActions";
 import { getListUserAction } from "../../redux/actions/UserActions";
+import { SET_PROJECT_UPDATE } from "../../redux/types/ProjectType";
+import { DISPLAY_DRAWER, SET_COMPONENT } from "../../redux/types/DrawerType";
+import FormUpdateProject from "../../component/Forms/FormUpdateProject";
 
 export default function Projects() {
-    const [projects, setProjects] = useState([]);
     const [users, setUsers] = useState([]);
     const [userSelected, setUserSelected] = useState(undefined);
     const [valueInput, setValueInput] = useState("");
+    const {projects} = useSelector(state => state.ProjectReducer);
     const dispatch = useDispatch();
     const searchUserRef = useRef(null);
-
-    const getAllProjects = async () => {
-        const data = await dispatch(getAllProjectAction());
-        setProjects([...data]);
-    };
 
     const getListUser = async (name) => {
         const data = await dispatch(getListUserAction(name));
@@ -31,12 +29,12 @@ export default function Projects() {
 
     useEffect(() => {
         dispatch(getProjectCategoryAction());
-        getAllProjects();
+        dispatch(getAllProjectAction());
     }, []);
 
     const confirmDelete = async (projectId) => {
         const isSuccess = await dispatch(deleteProjectAction(projectId));
-        if (isSuccess) getAllProjects();
+        if (isSuccess) dispatch(getAllProjectAction());
     };
 
     const handleSearch = (value) => {
@@ -45,7 +43,6 @@ export default function Projects() {
             clearTimeout(searchUserRef.current);
         }
         searchUserRef.current = setTimeout(() => {
-            console.log("search ", value);
             getListUser(value);
         }, 400);
     };
@@ -57,14 +54,32 @@ export default function Projects() {
 
     const handleAssignUser = async (model) => {
         const isSuccess = await dispatch(assignUserToProjectAction(model));
-        if (isSuccess) getAllProjects();
+        if (isSuccess) dispatch(getAllProjectAction());
     };
+
+    const handleUpdate = (project) => {
+        dispatch({
+            type: SET_COMPONENT,
+            payload: {
+                component: <FormUpdateProject />,
+                title: "Update Project"
+            }
+        })
+        dispatch({
+            type: SET_PROJECT_UPDATE,
+            projectUpdate: project
+        })
+        dispatch({
+            type: DISPLAY_DRAWER
+        })
+    }
 
     const renderUserListResult = useMemo(() => {
         return users?.map((user, index) => {
             return { label: user.name, value: user.userId };
         });
     }, [users]);
+
 
     const columns = [
         {
@@ -214,7 +229,7 @@ export default function Projects() {
                 return (
                     <div className={styles["list"]} key={index}>
                         <Tooltip placement="topRight" title="Update Project">
-                            <button className={`${styles["button"]} ${styles["update"]}`}>
+                            <button onClick={() => {handleUpdate(record)}} className={`${styles["button"]} ${styles["update"]}`}>
                                 <i className="fas fa-edit"></i>
                             </button>
                         </Tooltip>

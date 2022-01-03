@@ -7,10 +7,12 @@ import CreateProject from './page/CreateProject/CreateProject';
 import FormLayout from './layout/FormLayout/FormLayout';
 import Login from './page/Login-Signup/Login';
 import Signup from './page/Login-Signup/Signup';
+import DrawerHOC from './component/Drawer/DrawerHOC';
 
 function App() {
   return (
     <BrowserRouter>
+      <DrawerHOC />
       <Routes>
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Projects />} />

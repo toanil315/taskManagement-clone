@@ -23,11 +23,21 @@ class BaseServices {
         });
     }
 
+    put = (url, data) => {
+        return axiosClient({
+            method: 'PUT',
+            url,
+            data,
+            headers: {
+                'Authorization': 'Bearer ' + (localStorage.getItem(TOKEN) || "")   
+            }
+        });
+    }
+
     delete = (url, id) => {
         return axiosClient({
             method: 'DELETE',
             url,
-            data: id,
             headers: {
                 'Authorization': 'Bearer ' + (localStorage.getItem(TOKEN) || "")   
             }

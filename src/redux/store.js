@@ -2,10 +2,12 @@ import { applyMiddleware, combineReducers, createStore } from "redux";
 import thunk from "redux-thunk";
 import UserReducer from "./reducers/UserReducer";
 import ProjectReducer from "./reducers/ProjectReducer";
+import DrawerReducer from "./reducers/DrawerReducer";
 
 const rootReducer = combineReducers({
     UserReducer,
     ProjectReducer,
+    DrawerReducer,
 })
 
 const store = createStore(rootReducer, applyMiddleware(thunk));

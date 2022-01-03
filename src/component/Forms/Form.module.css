@@ -1,0 +1,54 @@
+.field {
+    margin-bottom: 20px;
+}
+
+.field p {
+    font-size: 14px;
+    font-weight: 500;
+    color: #5E6C84;
+    margin-bottom: 5px;
+}
+
+.field-input {
+    border: 0;
+    outline: none;
+    width: 100%;
+    padding: 5px 10px;
+    background-color: #F4F5F7;
+    border: 1px solid #DFE1E6;
+    border-radius: 3px;
+    font-size: 14px;
+    color: #172b4d;
+    font-weight: 500;
+}
+
+.field-input:focus {
+    background-color: white;
+    border: 1px solid rgb(76, 154, 255);
+    box-shadow: rgb(76 154 255) 0px 0px 0px 1px;
+}
+
+.field .error {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgb(223, 10, 10);
+    margin-top: 5px;
+}
+
+.button {
+    border: 0;
+    outline: none;
+    padding: 5px 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+    background-color: #0052CC;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s linear;
+}
+
+.button:hover {
+    background-color: #01409e;
+}

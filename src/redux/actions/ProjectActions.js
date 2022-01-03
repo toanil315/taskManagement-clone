@@ -1,12 +1,16 @@
 import { projectServices } from "../../services/ProjectServices";
-import { SET_PROJECT_CATEGORY } from "../types/ProjectType";
+import { SET_LIST_PROJECT, SET_PROJECT_CATEGORY } from "../types/ProjectType";
 
 export const getAllProjectAction = () => {
     return async (dispatch) => {
         try {
             const {data, status} = await projectServices.getAllProject();
             if(status === 200) {
-                return data.content;
+                dispatch({
+                    type: SET_LIST_PROJECT,
+                    projects: data.content
+                });
+                return true;
             }
         }
         catch(error) {
@@ -65,9 +69,24 @@ export const deleteProjectAction = (projectId) => {
 export const assignUserToProjectAction = (model) => {
     return async (dispatch) => {
         try {
-            console.log(model);
             const {data, status} = await projectServices.assignUserToProject(model);
             if(status === 200) {
+                return true;
+            }
+        }
+        catch(error) {
+            console.log("error: ", {...error});
+            return false;
+        }
+    }
+}
+
+export const updateProjectAction = (model) => {
+    return async (dispatch) => {
+        try {
+            const {data, status} = await projectServices.updateProject(model);
+            if(status === 200) {
+                dispatch(getAllProjectAction());
                 return true;
             }
         }
