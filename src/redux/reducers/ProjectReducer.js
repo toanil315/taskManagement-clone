@@ -1,9 +1,10 @@
-import {SET_LIST_PROJECT, SET_PROJECT_CATEGORY, SET_PROJECT_UPDATE} from '../types/ProjectType';
+import {SET_LIST_PROJECT, SET_PROJECT_CATEGORY, SET_PROJECT_DETAIL, SET_PROJECT_UPDATE} from '../types/ProjectType';
 
 const stateDefault = {
     projects: [],
     categories: [],
-    projectUpdate: {}
+    projectUpdate: {},
+    projectDetail: {},
 }
 
 const ProjectReducer = (state = stateDefault, action) => {
@@ -18,6 +19,10 @@ const ProjectReducer = (state = stateDefault, action) => {
 
         case SET_PROJECT_UPDATE: {
             return {...state, projectUpdate: {...action.projectUpdate}};
+        }
+
+        case SET_PROJECT_DETAIL: {
+            return {...state, projectDetail: {...action.projectDetail}};
         }
 
         default: {

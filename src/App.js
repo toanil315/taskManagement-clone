@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
 import PublicLayout from './layout/PublicLayout/PublicLayout';
@@ -8,6 +7,7 @@ import FormLayout from './layout/FormLayout/FormLayout';
 import Login from './page/Login-Signup/Login';
 import Signup from './page/Login-Signup/Signup';
 import DrawerHOC from './component/Drawer/DrawerHOC';
+import ProjectDetail from './page/ProjectDetail/ProjectDetail';
 
 function App() {
   return (
@@ -17,6 +17,7 @@ function App() {
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Projects />} />
           <Route path="projects" element={<Projects />} />
+          <Route path="projects/:projectId" element={<ProjectDetail />} />
           <Route path="createProject" element={<CreateProject />} />
         </Route>
         <Route path="login" element={<FormLayout />}>

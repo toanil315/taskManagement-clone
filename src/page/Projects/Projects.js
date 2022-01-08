@@ -13,6 +13,7 @@ import { getListUserAction } from "../../redux/actions/UserActions";
 import { SET_PROJECT_UPDATE } from "../../redux/types/ProjectType";
 import { DISPLAY_DRAWER, SET_COMPONENT } from "../../redux/types/DrawerType";
 import FormUpdateProject from "../../component/Forms/FormUpdateProject";
+import {NavLink} from 'react-router-dom';
 
 export default function Projects() {
     const [users, setUsers] = useState([]);
@@ -86,11 +87,17 @@ export default function Projects() {
             title: "Id",
             dataIndex: "id",
             width: "10%",
+            render: (text, record, index) => {
+                return <NavLink className={styles['text']} to={`projects/${text}`}>{text}</NavLink>
+            }
         },
         {
             title: "Project Name",
             dataIndex: "projectName",
             width: "30%",
+            render: (text, record, index) => {
+                return <NavLink className={styles['text']} to={`projects/${record.id}`}>{text}</NavLink>
+            }
         },
         {
             title: "Category",

@@ -1,5 +1,5 @@
 import { projectServices } from "../../services/ProjectServices";
-import { SET_LIST_PROJECT, SET_PROJECT_CATEGORY } from "../types/ProjectType";
+import { SET_LIST_PROJECT, SET_PROJECT_CATEGORY, SET_PROJECT_DETAIL } from "../types/ProjectType";
 
 export const getAllProjectAction = () => {
     return async (dispatch) => {
@@ -93,6 +93,23 @@ export const updateProjectAction = (model) => {
         catch(error) {
             console.log("error: ", {...error});
             return false;
+        }
+    }
+}
+
+export const getProjectDetailAction = (projectId) => {
+    return async (dispatch) => {
+        try {
+            const {data, status} = await projectServices.getProjectDetail(projectId);
+            if(status === 200) {
+                dispatch({
+                    type: SET_PROJECT_DETAIL,
+                    projectDetail: data.content,
+                })
+            }
+        }
+        catch(error) {
+            console.log("error: ", {...error});
         }
     }
 }

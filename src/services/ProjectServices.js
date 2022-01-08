@@ -25,6 +25,26 @@ class ProjectServices extends BaseServices {
     updateProject = (model) => {
         return this.put(`${Domain}/Project/updateProject?projectId=${model.id}`, model)
     }
+
+    getProjectDetail = (projectId) => {
+        return this.get(`${Domain}/Project/getProjectDetail?id=${projectId}`);
+    }
+
+    getUserByProjectId = (projectId) => {
+        return this.get(`${Domain}/Users/getUserByProjectId?idProject=${projectId}`)
+    }
+
+    getStatus = () => {
+        return this.getWithoutHeader(`${Domain}/Status/getAll`);
+    }
+
+    getType = () => {
+        return this.getWithoutHeader(`${Domain}/TaskType/getAll`);
+    }
+
+    getPrority = () => {
+        return this.getWithoutHeader(`${Domain}/Priority/getAll?id=0`);
+    }
 }
 
 export const projectServices = new ProjectServices();
