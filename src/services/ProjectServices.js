@@ -45,6 +45,10 @@ class ProjectServices extends BaseServices {
     getPrority = () => {
         return this.getWithoutHeader(`${Domain}/Priority/getAll?id=0`);
     }
+
+    createTask = (modelTask) => {
+        return this.post(`${Domain}/Project/createTask`, modelTask);
+    }
 }
 
 export const projectServices = new ProjectServices();

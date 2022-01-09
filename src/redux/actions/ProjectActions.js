@@ -1,4 +1,5 @@
 import { projectServices } from "../../services/ProjectServices";
+import { HIDE_DRAWER } from "../types/DrawerType";
 import { SET_LIST_PROJECT, SET_PROJECT_CATEGORY, SET_PROJECT_DETAIL } from "../types/ProjectType";
 
 export const getAllProjectAction = () => {
@@ -110,6 +111,25 @@ export const getProjectDetailAction = (projectId) => {
         }
         catch(error) {
             console.log("error: ", {...error});
+        }
+    }
+}
+
+export const createTaskAction = (modelTask, projectId) => {
+    return async (dispatch) => {
+        try {
+            const {data, status} = await projectServices.createTask(modelTask);
+            if(status === 200) {
+                dispatch(getProjectDetailAction(projectId));
+                dispatch({
+                    type: HIDE_DRAWER
+                })
+                
+            }
+        }
+        catch(error) {
+            console.log("error: ", {...error});
+            return false;
         }
     }
 }

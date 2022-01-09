@@ -6,6 +6,8 @@ import styles from "./Form.module.css";
 import { Select } from "antd";
 import { useDispatch } from "react-redux";
 import { projectServices } from "../../services/ProjectServices";
+import * as Yup from "yup";
+import { createTaskAction } from "../../redux/actions/ProjectActions";
 
 const { Option } = Select;
 
@@ -36,7 +38,22 @@ export default function FormCreateTask({ projectId }) {
 
     useEffect(() => {
         getInfos();
-    }, []);
+    }, [projectId]);
+
+    const clearForm = () => {
+        formik.setValues({
+            listUserAsign: [],
+            taskName: "",
+            description: "",
+            statusId: "1",
+            originalEstimate: 0,
+            timeTrackingSpent: 0,
+            timeTrackingRemaining: 0,
+            projectId: Number(projectId),
+            typeId: 1,
+            priorityId: 1,
+        });
+    };
 
     const formik = useFormik({
         initialValues: {
@@ -51,8 +68,14 @@ export default function FormCreateTask({ projectId }) {
             typeId: 1,
             priorityId: 1,
         },
+        validationSchema: Yup.object({
+            taskName: Yup.string().required("*Project Name is Required!"),
+            description: Yup.string().required("*Description is Required!"),
+            originalEstimate: Yup.number().min(1, "*Original Estimate is invalid!"),
+        }),
         onSubmit: (values) => {
-            console.log(values);
+            dispatch(createTaskAction(values, projectId));
+            clearForm();
         },
     });
 
@@ -60,6 +83,17 @@ export default function FormCreateTask({ projectId }) {
         return infos.types?.map((type, index) => {
             return (
                 <Option key={index} value={type.id}>
+                    {type.taskType === "bug" ? (
+                        <i
+                            style={{ color: "rgb(189, 28, 28)", paddingRight: "8px" }}
+                            className="fa fa-bug"
+                        ></i>
+                    ) : (
+                        <i
+                            style={{ color: "#4FADE6", paddingRight: "8px" }}
+                            className="fas fa-check-square"
+                        ></i>
+                    )}
                     {type.taskType}
                 </Option>
             );
@@ -81,6 +115,11 @@ export default function FormCreateTask({ projectId }) {
         return infos.members?.map((mem, index) => {
             return (
                 <Option key={index} value={mem.userId} label={mem.name}>
+                    <img
+                        style={{ width: 25, height: 25, borderRadius: "50%", marginRight: 10 }}
+                        src={mem.avatar}
+                        alt="avatar"
+                    />
                     {mem.name}
                 </Option>
             );
@@ -91,14 +130,26 @@ export default function FormCreateTask({ projectId }) {
         return infos.priorities?.map((priority, index) => {
             return (
                 <Option key={index} value={priority.priorityId}>
-                    {priority.priority}
+                    {priority.priority.includes("Low") ? (
+                        <i
+                            className={`${styles["priority"]} ${
+                                styles[priority.priority]
+                            } fa fa-arrow-down`}
+                        ></i>
+                    ) : (
+                        <i
+                            className={`${styles["priority"]} ${
+                                styles[priority.priority]
+                            } fa fa-arrow-up`}
+                        ></i>
+                    )}
+                    <span style={{ paddingLeft: 10 }}>{priority.priority}</span>
                 </Option>
             );
-        })
-    }
+        });
+    };
 
     const handleChangeMember = (value) => {
-        console.log(value);
         formik.setFieldValue("listUserAsign", value);
     };
 
@@ -123,12 +174,12 @@ export default function FormCreateTask({ projectId }) {
 
     const handlePriorityChange = (value) => {
         formik.setFieldValue("priorityId", value);
-    }
+    };
 
     return (
         <div>
             <form onSubmit={formik.handleSubmit} className={styles["form"]}>
-                <div className={styles["field"]}>
+                <div className={`${styles["field"]} ${formik.errors.taskName ? "error" : ""}`}>
                     <p>Task Name</p>
                     <input
                         placeholder="type something..."
@@ -136,8 +187,13 @@ export default function FormCreateTask({ projectId }) {
                         type="text"
                         name="taskName"
                         onChange={formik.handleChange}
+                        value={formik.values.taskName}
                     />
-                    <p className={styles["error"]}></p>
+                    <p className={styles["error"]}>
+                        {formik.errors.taskName && formik.touched.taskName
+                            ? formik.errors.taskName
+                            : ""}
+                    </p>
                 </div>
                 <div className={styles["group"]}>
                     <div className={styles["field"]}>
@@ -168,7 +224,7 @@ export default function FormCreateTask({ projectId }) {
                 <div className={styles["field"]}>
                     <p>Description</p>
                     <Editor
-                        value=""
+                        value={formik.values.description}
                         name="description"
                         apiKey={editorkey}
                         onEditorChange={handleEditorChange}
@@ -189,22 +245,32 @@ export default function FormCreateTask({ projectId }) {
                                 "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
                         }}
                     />
-                    <p className={styles["error"]}></p>
+                    <p className={styles["error"]}>
+                        {formik.errors.description && formik.touched.description
+                            ? formik.errors.description
+                            : ""}
+                    </p>
                 </div>
                 <div className={styles["field"]}>
                     <p>Assigness</p>
                     <Select
+                        value={formik.values.listUserAsign}
                         mode="multiple"
                         style={{ width: "100%" }}
                         placeholder="select members..."
                         onChange={handleChangeMember}
                         optionLabelProp="label"
+                        name="listUserAsign"
                     >
                         {renderMember()}
                     </Select>
                 </div>
                 <div className={styles["group"]}>
-                    <div className={styles["field"]}>
+                    <div
+                        className={`${styles["field"]} ${
+                            formik.errors.originalEstimate ? "error" : ""
+                        }`}
+                    >
                         <p>Original Estimate</p>
                         <input
                             placeholder="Estimate..."
@@ -212,7 +278,13 @@ export default function FormCreateTask({ projectId }) {
                             type="text"
                             name="originalEstimate"
                             onChange={handleEstimateChange}
+                            value={formik.values.originalEstimate}
                         />
+                        <p className={styles["error"]}>
+                            {formik.errors.originalEstimate && formik.touched.originalEstimate
+                                ? formik.errors.originalEstimate
+                                : ""}
+                        </p>
                     </div>
                     <div className={styles["field"]}>
                         <p>Priority</p>
@@ -221,6 +293,7 @@ export default function FormCreateTask({ projectId }) {
                             placeholder="select priority..."
                             onChange={handlePriorityChange}
                             value={formik.values.priorityId}
+                            name="priorityId"
                         >
                             {renderPriority()}
                         </Select>

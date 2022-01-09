@@ -63,3 +63,20 @@
 .button:hover {
     background-color: #01409e;
 }
+
+/* ========================================PRIORITY======================================== */
+.priority.Low {
+    color: rgb(18, 214, 18);
+}
+
+.priority.Lowest {
+    color: rgb(15, 97, 15);
+}
+
+.priority.High {
+    color: #CE3F48;
+}
+
+.priority.Medium {
+    color: rgb(211, 146, 25);
+}
