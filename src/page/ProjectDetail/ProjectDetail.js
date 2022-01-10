@@ -6,6 +6,7 @@ import Breadcumb from "../../component/Breadcumb/Breadcumb";
 import FormCreateTask from "../../component/Forms/FormCreateTask";
 import { getProjectDetailAction } from "../../redux/actions/ProjectActions";
 import { DISPLAY_DRAWER, SET_COMPONENT } from "../../redux/types/DrawerType";
+import { DISPLAY_MODAL } from "../../redux/types/ModalType";
 import styles from "./ProjectDetail.module.css";
 
 export default function ProjectDetail() {
@@ -15,6 +16,17 @@ export default function ProjectDetail() {
     useEffect(() => {
         dispatch(getProjectDetailAction(projectId));
     }, [projectId]);
+
+    const displayModalTask = (taskId, projectId) => {
+        dispatch({
+            type: DISPLAY_MODAL,
+            payload: {
+                visible: true,
+                taskId,
+                projectId
+            }
+        })
+    }
 
     const renderBoard = () => {
         return projectDetail?.lstTask?.map((listTask, index) => {
@@ -32,7 +44,7 @@ export default function ProjectDetail() {
             const type = task.taskTypeDetail.taskType;
             const priority = task.priorityTask.priority;
             return (
-                <li key={index} className={styles["task"]}>
+                <li onClick={() => {displayModalTask(task.taskId, task.projectId)}} key={index} className={styles["task"]}>
                     <h4>{task.taskName}</h4>
                     <div className={styles["info"]}>
                         <span

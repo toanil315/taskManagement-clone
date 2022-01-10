@@ -49,6 +49,10 @@ class ProjectServices extends BaseServices {
     createTask = (modelTask) => {
         return this.post(`${Domain}/Project/createTask`, modelTask);
     }
+
+    getTaskDetail = (taskId) => {
+        return this.get(`${Domain}/Project/getTaskDetail?taskId=${taskId}`);
+    }
 }
 
 export const projectServices = new ProjectServices();

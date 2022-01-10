@@ -8,11 +8,13 @@ import Login from './page/Login-Signup/Login';
 import Signup from './page/Login-Signup/Signup';
 import DrawerHOC from './component/Drawer/DrawerHOC';
 import ProjectDetail from './page/ProjectDetail/ProjectDetail';
+import ModalTask from './component/Modals/ModalTask/ModalTask';
 
 function App() {
   return (
     <BrowserRouter>
       <DrawerHOC />
+      <ModalTask />
       <Routes>
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Projects />} />
