@@ -288,8 +288,8 @@
     top: 0;
     left: 0;
     height: 5px;
-    width: 50%;
     background-color: #0052CC;
+    transition: all 0.2s linear;
 }
 
 .hour {

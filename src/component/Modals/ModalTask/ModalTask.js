@@ -1,12 +1,13 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { Dropdown, Select, Tag } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { HIDE_MODAL } from "../../../redux/types/ModalType";
 import { projectServices } from "../../../services/ProjectServices";
 import { editorkey } from "../../../util/constant";
 import styles from "./ModalTask.module.css";
 import parse from "html-react-parser";
+import { updateTaskAction } from "../../../redux/actions/ProjectActions";
 
 const { Option } = Select;
 
@@ -33,8 +34,10 @@ export default function ModalTask() {
         members: [],
     });
     const [taskDetail, setTaskDetail] = useState({});
+    const [editorContent, setEditorContent] = useState("");
     const [showEditor, setShowEditor] = useState(false);
     const { visible, taskId, projectId } = useSelector((state) => state.ModalReducer.modalTask);
+    const debounceRef = useRef(null);
     const dispatch = useDispatch();
 
     const getInfos = () => {
@@ -53,6 +56,7 @@ export default function ModalTask() {
                 members: responseMembers.data.content,
             });
             setTaskDetail(responseTask.data.content);
+            setEditorContent(responseTask.data.content.description);
         });
     };
 
@@ -145,6 +149,86 @@ export default function ModalTask() {
         });
     };
 
+    const handleNameChange = (event) => {
+        setTaskDetail({
+            ...taskDetail,
+            taskName: event.target.value,
+        });
+    };
+
+    const handleTypeChange = (value) => {
+        setTaskDetail({
+            ...taskDetail,
+            typeId: value,
+        });
+    };
+
+    const handleDescriptionChange = (value) => {
+        setEditorContent(value);
+    };
+
+    const handleStatusChange = (value) => {
+        setTaskDetail({
+            ...taskDetail,
+            statusId: value,
+        });
+    };
+
+    const handleAssignessChange = (value) => {
+        //Bo gia tri default("Add more") ra khoi mang id
+        const assignessFilter = value.filter((memberId) => {
+            return memberId !== "";
+        });
+        //Chuyen ve format array = [
+        //    {id}
+        // ]
+        const assignessArray = assignessFilter.map((id) => {
+            return { id };
+        });
+        setTaskDetail({
+            ...taskDetail,
+            assigness: assignessArray,
+        });
+    };
+
+    const handlePriorityChange = (value) => {
+        setTaskDetail({
+            ...taskDetail,
+            priorityId: value,
+        });
+    };
+
+    const handleEstimateChange = (event) => {
+        setTaskDetail({
+            ...taskDetail,
+            originalEstimate: Number(event.target.value),
+        });
+    };
+
+    const handleTrackingSpentChange = (event) => {
+        setTaskDetail({
+            ...taskDetail,
+            timeTrackingSpent: Number(event.target.value),
+            timeTrackingRemaining: taskDetail.originalEstimate - Number(event.target.value),
+        });
+    };
+
+    useEffect(() => {
+        if (debounceRef.current !== null) {
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(() => {
+            console.log("debounce");
+            //Change format from { assigness: [{id1}, {id2}...]} to { listUserAsign: [id1, id2,...]} for correct format in API
+            let modelTask = { ...taskDetail };
+            modelTask.listUserAsign = taskDetail.assigness.map(({ id }) => {
+                return id;
+            });
+            delete modelTask.assigness;
+            dispatch(updateTaskAction(modelTask));
+        }, 700);
+    }, [taskDetail]);
+
     return (
         <div style={{ display: visible ? "block" : "none" }} className={styles["modal-task"]}>
             <div className={styles["overlay"]}>
@@ -160,6 +244,7 @@ export default function ModalTask() {
                                 }}
                                 bordered={false}
                                 value={taskDetail.typeId}
+                                onChange={handleTypeChange}
                             >
                                 {renderType()}
                             </Select>
@@ -192,15 +277,17 @@ export default function ModalTask() {
                                 value={taskDetail.taskName}
                                 className={styles["task-name"]}
                                 type="text"
+                                onChange={handleNameChange}
                             />
                             <div className={styles["field"]}>
                                 <p className={styles["title"]}>Description</p>
                                 {showEditor ? (
                                     <div style={{ height: 300 }}>
                                         <Editor
-                                            value={taskDetail.description || ""}
+                                            value={editorContent || ""}
                                             name="description"
                                             apiKey={editorkey}
+                                            onEditorChange={handleDescriptionChange}
                                             init={{
                                                 height: 250,
                                                 menubar: false,
@@ -218,11 +305,24 @@ export default function ModalTask() {
                                                     "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
                                             }}
                                         />
-                                        <button style={{marginTop: '15px'}} className={styles["button"]}>Save</button>
                                         <button
-                                            style={{marginTop: '15px'}}
+                                            onClick={() => {
+                                                setTaskDetail({
+                                                    ...taskDetail,
+                                                    description: editorContent,
+                                                });
+                                                setShowEditor(false);
+                                            }}
+                                            style={{ marginTop: "15px" }}
+                                            className={styles["button"]}
+                                        >
+                                            Save
+                                        </button>
+                                        <button
+                                            style={{ marginTop: "15px" }}
                                             onClick={() => {
                                                 setShowEditor(false);
+                                                setEditorContent(taskDetail.description);
                                             }}
                                             className={`${styles["button"]} ${styles["no-bg"]}`}
                                         >
@@ -244,12 +344,15 @@ export default function ModalTask() {
                             <div className={styles["field"]}>
                                 <p className={styles["title"]}>Comments</p>
                                 <div className={styles["comment"]}>
-                                    <img src={"https://ui-avatars.com/api/?name=Lona"} alt="avatar" />
+                                    <img
+                                        src={"https://ui-avatars.com/api/?name=Lona"}
+                                        alt="avatar"
+                                    />
                                     <div>
                                         <textarea
                                             rows={3}
                                             placeholder="Type something..."
-                                            className={`${styles["task-name"]} ${styles['comment-field']}`}
+                                            className={`${styles["task-name"]} ${styles["comment-field"]}`}
                                             type="text"
                                         />
                                         <button className={styles["button"]}>Send</button>
@@ -260,7 +363,11 @@ export default function ModalTask() {
                         <div className={styles["content-right"]}>
                             <div className={styles["field"]}>
                                 <p className={styles["title"]}>Status</p>
-                                <Select value={taskDetail?.statusId} placeholder="Select a status">
+                                <Select
+                                    onChange={handleStatusChange}
+                                    value={taskDetail?.statusId}
+                                    placeholder="Select a status"
+                                >
                                     {renderStatus()}
                                 </Select>
                             </div>
@@ -283,6 +390,7 @@ export default function ModalTask() {
                                     optionLabelProp="label"
                                     bordered={false}
                                     tagRender={tagRender}
+                                    onChange={handleAssignessChange}
                                 >
                                     {renderAssigness()}
                                     <Option
@@ -305,6 +413,7 @@ export default function ModalTask() {
                             <div className={styles["field"]}>
                                 <p className={styles["title"]}>Priority</p>
                                 <Select
+                                    onChange={handlePriorityChange}
                                     style={{ width: "50%" }}
                                     placeholder="select priority..."
                                     name="priorityId"
@@ -316,9 +425,11 @@ export default function ModalTask() {
                             <div className={styles["field"]}>
                                 <p className={styles["title"]}>Original estimate (hours)</p>
                                 <input
+                                    onChange={handleEstimateChange}
                                     value={taskDetail.originalEstimate || 0}
                                     type="number"
                                     className={styles["field-number"]}
+                                    min={0}
                                 />
                             </div>
                             <div className={styles["field"]}>
@@ -351,6 +462,9 @@ export default function ModalTask() {
                                                     value={taskDetail.timeTrackingSpent || 0}
                                                     type="number"
                                                     className={styles["field-number"]}
+                                                    onChange={handleTrackingSpentChange}
+                                                    min={0}
+                                                    max={taskDetail.originalEstimate || 8}
                                                 />
                                                 h logged
                                             </span>
