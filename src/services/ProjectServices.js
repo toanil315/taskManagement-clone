@@ -54,8 +54,20 @@ class ProjectServices extends BaseServices {
         return this.get(`${Domain}/Project/getTaskDetail?taskId=${taskId}`);
     }
 
+    getComment = (taskId) => {
+        return this.getWithoutHeader(`${Domain}/Comment/getAll?taskId=${taskId}`);
+    }
+
     updateTask = (modelTask) => {
         return this.post(`${Domain}/Project/updateTask`, modelTask);
+    }
+
+    deleteTask = (taskId) => {
+        return this.delete(`${Domain}/Project/removeTask?taskId=${taskId}`);
+    }
+
+    insertComment = (modalComment) => {
+        return this.post(`${Domain}/Comment/insertComment`, modalComment);
     }
 }
 

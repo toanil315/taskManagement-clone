@@ -150,6 +150,11 @@
     cursor: pointer;
 }
 
+.button.loading {
+    background-color: #7ea3db;
+    cursor: not-allowed;
+}
+
 .button:hover {
     background-color: #0244a7;
 }
@@ -307,6 +312,7 @@
 .comment {
     display: flex;
     margin-top: 10px;
+    margin-bottom: 15px;
 }
 
 .comment img {
@@ -319,6 +325,23 @@
 
 .comment > div {
     width: 100%;
+}
+
+.comment .cmt-content {
+    width: 50%;
+}
+
+.comment .cmt-content h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #516079;
+    margin-bottom: 2px;
+}
+
+.comment .cmt-content p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #516079;
 }
 
 .task-name.comment-field {

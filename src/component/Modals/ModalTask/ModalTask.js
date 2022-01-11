@@ -7,7 +7,8 @@ import { projectServices } from "../../../services/ProjectServices";
 import { editorkey } from "../../../util/constant";
 import styles from "./ModalTask.module.css";
 import parse from "html-react-parser";
-import { updateTaskAction } from "../../../redux/actions/ProjectActions";
+import { getProjectDetailAction, updateTaskAction } from "../../../redux/actions/ProjectActions";
+import ModalConfirm from "./ModalConfirm";
 
 const { Option } = Select;
 
@@ -34,8 +35,11 @@ export default function ModalTask() {
         members: [],
     });
     const [taskDetail, setTaskDetail] = useState({});
+    const [comments, setComments] = useState([]);
     const [editorContent, setEditorContent] = useState("");
+    const [commentContent, setCmtContent] = useState("");
     const [showEditor, setShowEditor] = useState(false);
+    const [visibleModalConfirm, setModalConfirm] = useState(false);
     const { visible, taskId, projectId } = useSelector((state) => state.ModalReducer.modalTask);
     const debounceRef = useRef(null);
     const dispatch = useDispatch();
@@ -46,18 +50,28 @@ export default function ModalTask() {
         const dataPriority = projectServices.getPrority();
         const dataMembers = projectServices.getUserByProjectId(projectId);
         const dataTask = projectServices.getTaskDetail(taskId);
-        Promise.all([dataTypes, dataStatus, dataPriority, dataMembers, dataTask]).then((values) => {
-            const [responseTypes, responseStatus, responsePriority, responseMembers, responseTask] =
-                values;
-            setInfo({
-                types: responseTypes.data.content,
-                status: responseStatus.data.content,
-                priorities: responsePriority.data.content,
-                members: responseMembers.data.content,
-            });
-            setTaskDetail(responseTask.data.content);
-            setEditorContent(responseTask.data.content.description);
-        });
+        const dataComment = projectServices.getComment(taskId);
+        Promise.all([dataTypes, dataStatus, dataPriority, dataMembers, dataTask, dataComment]).then(
+            (values) => {
+                const [
+                    responseTypes,
+                    responseStatus,
+                    responsePriority,
+                    responseMembers,
+                    responseTask,
+                    responseComment,
+                ] = values;
+                setInfo({
+                    types: responseTypes.data.content,
+                    status: responseStatus.data.content,
+                    priorities: responsePriority.data.content,
+                    members: responseMembers.data.content,
+                });
+                setTaskDetail(responseTask.data.content);
+                setComments(responseComment.data.content);
+                setEditorContent(responseTask.data.content.description);
+            }
+        );
     };
 
     useEffect(() => {
@@ -149,6 +163,24 @@ export default function ModalTask() {
         });
     };
 
+    const renderComment = () => {
+        return comments?.map((cmt, index) => {
+            return (
+                <li key={index} className={styles["comment"]}>
+                    <img src={cmt.user.avatar} alt="avatar" />
+                    <div className={styles["cmt-content"]}>
+                        <h4>{cmt.user.name}</h4>
+                        <p>{cmt.contentComment}</p>
+                    </div>
+                </li>
+            );
+        });
+    };
+
+    const handleCmtChange = (event) => {
+        setCmtContent(event.target.value);
+    };
+
     const handleNameChange = (event) => {
         setTaskDetail({
             ...taskDetail,
@@ -229,248 +261,311 @@ export default function ModalTask() {
         }, 700);
     }, [taskDetail]);
 
+    const sendComment = async (modalComment) => {
+        try {
+            console.log(modalComment);
+            const { status } = await projectServices.insertComment(modalComment);
+            if (status === 200) {
+                setCmtContent("");
+                const { data } = await projectServices.getComment(taskId);
+                setComments(data.content);
+            }
+        } catch (error) {
+            console.log("error: ", error);
+        }
+    };
+
+    const hideModalConfirm = () => {
+        setModalConfirm(false);
+    };
+
+    const deleteTask = async () => {
+        try {
+            console.log(taskId)
+            const {status} = await projectServices.deleteTask(taskId);
+            if(status === 200) {
+                console.log("delete", taskId);
+                await dispatch(getProjectDetailAction(projectId));
+                setModalConfirm(false);
+                dispatch({ type: HIDE_MODAL });
+                return true;
+            }
+        }
+        catch(error) {
+            console.log("error: ", {...error});
+        }
+    };
+
     return (
-        <div style={{ display: visible ? "block" : "none" }} className={styles["modal-task"]}>
-            <div className={styles["overlay"]}>
-                <div className={styles["content"]}>
-                    <div className={styles["header"]}>
-                        <div className={styles["type"]}>
-                            <Select
-                                showArrow={false}
-                                style={{
-                                    backgroundColor: "transparent",
-                                    boxShadow: "unset",
-                                    border: 0,
-                                }}
-                                bordered={false}
-                                value={taskDetail.typeId}
-                                onChange={handleTypeChange}
-                            >
-                                {renderType()}
-                            </Select>
-                        </div>
-                        <div className={styles["user-ctrl"]}>
-                            <span className={styles["item"]}>
-                                <i className="fa fa-paper-plane"></i>
-                                <span>Give feedback</span>
-                            </span>
-                            <span className={styles["item"]}>
-                                <i className="fa fa-link"></i>
-                                <span>Copy link</span>
-                            </span>
-                            <span className={styles["item"]}>
-                                <i className="fa fa-trash"></i>
-                            </span>
-                            <span
-                                onClick={() => {
-                                    dispatch({ type: HIDE_MODAL });
-                                }}
-                                className={styles["item"]}
-                            >
-                                <i className="fa fa-times"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <div className={styles["row"]}>
-                        <div className={styles["content-left"]}>
-                            <textarea
-                                value={taskDetail.taskName}
-                                className={styles["task-name"]}
-                                type="text"
-                                onChange={handleNameChange}
-                            />
-                            <div className={styles["field"]}>
-                                <p className={styles["title"]}>Description</p>
-                                {showEditor ? (
-                                    <div style={{ height: 300 }}>
-                                        <Editor
-                                            value={editorContent || ""}
-                                            name="description"
-                                            apiKey={editorkey}
-                                            onEditorChange={handleDescriptionChange}
-                                            init={{
-                                                height: 250,
-                                                menubar: false,
-                                                plugins: [
-                                                    "advlist autolink lists link image charmap print preview anchor",
-                                                    "searchreplace visualblocks code fullscreen",
-                                                    "insertdatetime media table paste code help wordcount",
-                                                ],
-                                                toolbar:
-                                                    "undo redo | formatselect | " +
-                                                    "bold italic backcolor | alignleft aligncenter " +
-                                                    "alignright alignjustify | bullist numlist outdent indent | " +
-                                                    "removeformat | help",
-                                                content_style:
-                                                    "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
-                                            }}
-                                        />
-                                        <button
-                                            onClick={() => {
-                                                setTaskDetail({
-                                                    ...taskDetail,
-                                                    description: editorContent,
-                                                });
-                                                setShowEditor(false);
-                                            }}
-                                            style={{ marginTop: "15px" }}
-                                            className={styles["button"]}
-                                        >
-                                            Save
-                                        </button>
-                                        <button
-                                            style={{ marginTop: "15px" }}
-                                            onClick={() => {
-                                                setShowEditor(false);
-                                                setEditorContent(taskDetail.description);
-                                            }}
-                                            className={`${styles["button"]} ${styles["no-bg"]}`}
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div style={{ minHeight: 300 }}>
-                                        <div
-                                            onClick={() => {
-                                                setShowEditor(true);
-                                            }}
-                                        >
-                                            {parse(taskDetail.description || "")}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className={styles["field"]}>
-                                <p className={styles["title"]}>Comments</p>
-                                <div className={styles["comment"]}>
-                                    <img
-                                        src={"https://ui-avatars.com/api/?name=Lona"}
-                                        alt="avatar"
-                                    />
-                                    <div>
-                                        <textarea
-                                            rows={3}
-                                            placeholder="Type something..."
-                                            className={`${styles["task-name"]} ${styles["comment-field"]}`}
-                                            type="text"
-                                        />
-                                        <button className={styles["button"]}>Send</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className={styles["content-right"]}>
-                            <div className={styles["field"]}>
-                                <p className={styles["title"]}>Status</p>
+        <>
+            <ModalConfirm
+                title="Are you sure you want to delete this task?"
+                note="Once you delete, it's gone for good."
+                confirm={deleteTask}
+                contentBtn="Delete Task"
+                visible={visibleModalConfirm}
+                onCancel={hideModalConfirm}
+            />
+            <div style={{ display: visible ? "block" : "none" }} className={styles["modal-task"]}>
+                <div className={styles["overlay"]}>
+                    <div className={styles["content"]}>
+                        <div className={styles["header"]}>
+                            <div className={styles["type"]}>
                                 <Select
-                                    onChange={handleStatusChange}
-                                    value={taskDetail?.statusId}
-                                    placeholder="Select a status"
-                                >
-                                    {renderStatus()}
-                                </Select>
-                            </div>
-                            <div className={styles["field"]}>
-                                <p className={styles["title"]}>Assigness</p>
-                                <Select
-                                    mode="multiple"
+                                    showArrow={false}
                                     style={{
-                                        width: "80%",
                                         backgroundColor: "transparent",
                                         boxShadow: "unset",
                                         border: 0,
                                     }}
-                                    placeholder="select one country"
-                                    value={
-                                        taskDetail.assigness
-                                            ? [...taskDetail.assigness.map((mem) => mem.id), ""]
-                                            : [""]
-                                    }
-                                    optionLabelProp="label"
                                     bordered={false}
-                                    tagRender={tagRender}
-                                    onChange={handleAssignessChange}
+                                    value={taskDetail.typeId}
+                                    onChange={handleTypeChange}
                                 >
-                                    {renderAssigness()}
-                                    <Option
-                                        style={{ display: "none" }}
-                                        value=""
-                                        label={
+                                    {renderType()}
+                                </Select>
+                            </div>
+                            <div className={styles["user-ctrl"]}>
+                                <span className={styles["item"]}>
+                                    <i className="fa fa-paper-plane"></i>
+                                    <span>Give feedback</span>
+                                </span>
+                                <span className={styles["item"]}>
+                                    <i className="fa fa-link"></i>
+                                    <span>Copy link</span>
+                                </span>
+                                <span
+                                    onClick={() => {
+                                        setModalConfirm(true);
+                                    }}
+                                    className={styles["item"]}
+                                >
+                                    <i className="fa fa-trash"></i>
+                                </span>
+                                <span
+                                    onClick={() => {
+                                        dispatch({ type: HIDE_MODAL });
+                                    }}
+                                    className={styles["item"]}
+                                >
+                                    <i className="fa fa-times"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div className={styles["row"]}>
+                            <div className={styles["content-left"]}>
+                                <textarea
+                                    value={taskDetail.taskName}
+                                    className={styles["task-name"]}
+                                    type="text"
+                                    onChange={handleNameChange}
+                                />
+                                <div className={styles["field"]}>
+                                    <p className={styles["title"]}>Description</p>
+                                    {showEditor ? (
+                                        <div style={{ height: 300 }}>
+                                            <Editor
+                                                value={editorContent || ""}
+                                                name="description"
+                                                apiKey={editorkey}
+                                                onEditorChange={handleDescriptionChange}
+                                                init={{
+                                                    height: 250,
+                                                    menubar: false,
+                                                    plugins: [
+                                                        "advlist autolink lists link image charmap print preview anchor",
+                                                        "searchreplace visualblocks code fullscreen",
+                                                        "insertdatetime media table paste code help wordcount",
+                                                    ],
+                                                    toolbar:
+                                                        "undo redo | formatselect | " +
+                                                        "bold italic backcolor | alignleft aligncenter " +
+                                                        "alignright alignjustify | bullist numlist outdent indent | " +
+                                                        "removeformat | help",
+                                                    content_style:
+                                                        "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                                                }}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    setTaskDetail({
+                                                        ...taskDetail,
+                                                        description: editorContent,
+                                                    });
+                                                    setShowEditor(false);
+                                                }}
+                                                style={{ marginTop: "15px" }}
+                                                className={styles["button"]}
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                style={{ marginTop: "15px" }}
+                                                onClick={() => {
+                                                    setShowEditor(false);
+                                                    setEditorContent(taskDetail.description);
+                                                }}
+                                                className={`${styles["button"]} ${styles["no-bg"]}`}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ minHeight: 300 }}>
+                                            <div
+                                                onClick={() => {
+                                                    setShowEditor(true);
+                                                }}
+                                            >
+                                                {parse(taskDetail.description || "")}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className={styles["field"]}>
+                                    <p className={styles["title"]}>Comments</p>
+                                    <div className={styles["comment"]}>
+                                        <img
+                                            src={"https://ui-avatars.com/api/?name=Lona"}
+                                            alt="avatar"
+                                        />
+                                        <div>
+                                            <textarea
+                                                rows={3}
+                                                placeholder="Type something..."
+                                                className={`${styles["task-name"]} ${styles["comment-field"]}`}
+                                                type="text"
+                                                onChange={handleCmtChange}
+                                                value={commentContent}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    sendComment({
+                                                        taskId,
+                                                        contentComment: commentContent,
+                                                    });
+                                                }}
+                                                className={styles["button"]}
+                                            >
+                                                Send
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <ul className={styles["list-comment"]}>{renderComment()}</ul>
+                                </div>
+                            </div>
+                            <div className={styles["content-right"]}>
+                                <div className={styles["field"]}>
+                                    <p className={styles["title"]}>Status</p>
+                                    <Select
+                                        onChange={handleStatusChange}
+                                        value={taskDetail?.statusId}
+                                        placeholder="Select a status"
+                                    >
+                                        {renderStatus()}
+                                    </Select>
+                                </div>
+                                <div className={styles["field"]}>
+                                    <p className={styles["title"]}>Assigness</p>
+                                    <Select
+                                        mode="multiple"
+                                        style={{
+                                            width: "80%",
+                                            backgroundColor: "transparent",
+                                            boxShadow: "unset",
+                                            border: 0,
+                                        }}
+                                        placeholder="select one country"
+                                        value={
+                                            taskDetail.assigness
+                                                ? [...taskDetail.assigness.map((mem) => mem.id), ""]
+                                                : [""]
+                                        }
+                                        optionLabelProp="label"
+                                        bordered={false}
+                                        tagRender={tagRender}
+                                        onChange={handleAssignessChange}
+                                    >
+                                        {renderAssigness()}
+                                        <Option
+                                            style={{ display: "none" }}
+                                            value=""
+                                            label={
+                                                <div>
+                                                    <i className="fa fa-plus"></i>
+                                                    Add more
+                                                </div>
+                                            }
+                                        >
                                             <div>
                                                 <i className="fa fa-plus"></i>
                                                 Add more
                                             </div>
-                                        }
+                                        </Option>
+                                    </Select>
+                                </div>
+                                <div className={styles["field"]}>
+                                    <p className={styles["title"]}>Priority</p>
+                                    <Select
+                                        onChange={handlePriorityChange}
+                                        style={{ width: "50%" }}
+                                        placeholder="select priority..."
+                                        name="priorityId"
+                                        value={taskDetail.priorityId || ""}
                                     >
-                                        <div>
-                                            <i className="fa fa-plus"></i>
-                                            Add more
-                                        </div>
-                                    </Option>
-                                </Select>
-                            </div>
-                            <div className={styles["field"]}>
-                                <p className={styles["title"]}>Priority</p>
-                                <Select
-                                    onChange={handlePriorityChange}
-                                    style={{ width: "50%" }}
-                                    placeholder="select priority..."
-                                    name="priorityId"
-                                    value={taskDetail.priorityId || ""}
-                                >
-                                    {renderPriority()}
-                                </Select>
-                            </div>
-                            <div className={styles["field"]}>
-                                <p className={styles["title"]}>Original estimate (hours)</p>
-                                <input
-                                    onChange={handleEstimateChange}
-                                    value={taskDetail.originalEstimate || 0}
-                                    type="number"
-                                    className={styles["field-number"]}
-                                    min={0}
-                                />
-                            </div>
-                            <div className={styles["field"]}>
-                                <p className={styles["title"]}>Time tracking</p>
-                                <div className={styles["times"]}>
-                                    <i className="far fa-clock"></i>
-                                    <div className={styles["timeline"]}>
-                                        <div className={styles["time-bg"]}>
-                                            <span
-                                                style={{
-                                                    width: `${
-                                                        (taskDetail.timeTrackingSpent /
-                                                            taskDetail.originalEstimate) *
-                                                        100
-                                                    }%`,
-                                                }}
-                                                className={styles["width"]}
-                                            ></span>
-                                        </div>
-                                        <div className={styles["hour"]}>
-                                            <span>
-                                                <input
+                                        {renderPriority()}
+                                    </Select>
+                                </div>
+                                <div className={styles["field"]}>
+                                    <p className={styles["title"]}>Original estimate (hours)</p>
+                                    <input
+                                        onChange={handleEstimateChange}
+                                        value={taskDetail.originalEstimate || 0}
+                                        type="number"
+                                        className={styles["field-number"]}
+                                        min={0}
+                                    />
+                                </div>
+                                <div className={styles["field"]}>
+                                    <p className={styles["title"]}>Time tracking</p>
+                                    <div className={styles["times"]}>
+                                        <i className="far fa-clock"></i>
+                                        <div className={styles["timeline"]}>
+                                            <div className={styles["time-bg"]}>
+                                                <span
                                                     style={{
-                                                        width: "40px",
-                                                        marginRight: 5,
-                                                        fontSize: "14px",
-                                                        fontWeight: 500,
-                                                        color: "#52617B",
+                                                        width: `${
+                                                            (taskDetail.timeTrackingSpent /
+                                                                taskDetail.originalEstimate) *
+                                                            100
+                                                        }%`,
                                                     }}
-                                                    value={taskDetail.timeTrackingSpent || 0}
-                                                    type="number"
-                                                    className={styles["field-number"]}
-                                                    onChange={handleTrackingSpentChange}
-                                                    min={0}
-                                                    max={taskDetail.originalEstimate || 8}
-                                                />
-                                                h logged
-                                            </span>
-                                            <span>
-                                                {taskDetail.originalEstimate || 0}h estimated
-                                            </span>
+                                                    className={styles["width"]}
+                                                ></span>
+                                            </div>
+                                            <div className={styles["hour"]}>
+                                                <span>
+                                                    <input
+                                                        style={{
+                                                            width: "40px",
+                                                            marginRight: 5,
+                                                            fontSize: "14px",
+                                                            fontWeight: 500,
+                                                            color: "#52617B",
+                                                        }}
+                                                        value={taskDetail.timeTrackingSpent || 0}
+                                                        type="number"
+                                                        className={styles["field-number"]}
+                                                        onChange={handleTrackingSpentChange}
+                                                        min={0}
+                                                        max={taskDetail.originalEstimate || 8}
+                                                    />
+                                                    h logged
+                                                </span>
+                                                <span>
+                                                    {taskDetail.originalEstimate || 0}h estimated
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -479,6 +574,6 @@ export default function ModalTask() {
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
