@@ -9,10 +9,12 @@ import Signup from './page/Login-Signup/Signup';
 import DrawerHOC from './component/Drawer/DrawerHOC';
 import ProjectDetail from './page/ProjectDetail/ProjectDetail';
 import ModalTask from './component/Modals/ModalTask/ModalTask';
+import Loading from './component/Loading/Loading';
 
 function App() {
   return (
     <BrowserRouter>
+      <Loading />
       <DrawerHOC />
       <ModalTask />
       <Routes>

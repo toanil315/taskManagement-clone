@@ -14,6 +14,7 @@ import { SET_PROJECT_UPDATE } from "../../redux/types/ProjectType";
 import { DISPLAY_DRAWER, SET_COMPONENT } from "../../redux/types/DrawerType";
 import FormUpdateProject from "../../component/Forms/FormUpdateProject";
 import {NavLink} from 'react-router-dom';
+import { DISPLAY_LOADING } from "../../redux/types/LoadingType";
 
 export default function Projects() {
     const [users, setUsers] = useState([]);

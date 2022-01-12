@@ -1,16 +1,21 @@
 import { projectServices } from "../../services/ProjectServices";
 import { HIDE_DRAWER } from "../types/DrawerType";
+import { DISPLAY_LOADING, HIDE_LOADING } from "../types/LoadingType";
 import { SET_LIST_PROJECT, SET_PROJECT_CATEGORY, SET_PROJECT_DETAIL } from "../types/ProjectType";
 
 export const getAllProjectAction = () => {
     return async (dispatch) => {
         try {
+            dispatch({type: DISPLAY_LOADING});
             const {data, status} = await projectServices.getAllProject();
             if(status === 200) {
                 dispatch({
                     type: SET_LIST_PROJECT,
                     projects: data.content
                 });
+                setTimeout(() => {
+                    dispatch({type: HIDE_LOADING});
+                }, 500);
                 return true;
             }
         }
@@ -107,6 +112,9 @@ export const getProjectDetailAction = (projectId) => {
                     type: SET_PROJECT_DETAIL,
                     projectDetail: data.content,
                 })
+                setTimeout(() => {
+                    dispatch({type: HIDE_LOADING});
+                }, 500);
             }
         }
         catch(error) {
@@ -118,6 +126,7 @@ export const getProjectDetailAction = (projectId) => {
 export const createTaskAction = (modelTask, projectId) => {
     return async (dispatch) => {
         try {
+            dispatch({type: DISPLAY_LOADING});
             const {data, status} = await projectServices.createTask(modelTask);
             if(status === 200) {
                 dispatch(getProjectDetailAction(projectId));

@@ -9,6 +9,7 @@ import styles from "./ModalTask.module.css";
 import parse from "html-react-parser";
 import { getProjectDetailAction, updateTaskAction } from "../../../redux/actions/ProjectActions";
 import ModalConfirm from "./ModalConfirm";
+import ModalSkeleton from "../ModalSkeleton/ModalSkeleton";
 
 const { Option } = Select;
 
@@ -34,6 +35,7 @@ export default function ModalTask() {
         priorities: [],
         members: [],
     });
+    const [loadingSkeleton, setLoadingSkeleton] = useState(false);
     const [taskDetail, setTaskDetail] = useState({});
     const [comments, setComments] = useState([]);
     const [editorContent, setEditorContent] = useState("");
@@ -70,11 +72,15 @@ export default function ModalTask() {
                 setTaskDetail(responseTask.data.content);
                 setComments(responseComment.data.content);
                 setEditorContent(responseTask.data.content.description);
+                setTimeout(() => {
+                    setLoadingSkeleton(false);
+                }, 800);
             }
         );
     };
 
     useEffect(() => {
+        setLoadingSkeleton(true);
         if (taskId !== "" && projectId !== "") {
             getInfos();
         }
@@ -281,20 +287,29 @@ export default function ModalTask() {
 
     const deleteTask = async () => {
         try {
-            console.log(taskId)
-            const {status} = await projectServices.deleteTask(taskId);
-            if(status === 200) {
-                console.log("delete", taskId);
+            const { status } = await projectServices.deleteTask(taskId);
+            if (status === 200) {
                 await dispatch(getProjectDetailAction(projectId));
                 setModalConfirm(false);
                 dispatch({ type: HIDE_MODAL });
                 return true;
             }
-        }
-        catch(error) {
-            console.log("error: ", {...error});
+        } catch (error) {
+            console.log("error: ", { ...error });
         }
     };
+
+    if (loadingSkeleton) {
+        return (
+            <div style={{ display: visible ? "block" : "none" }} className={styles["modal-task"]}>
+                <div className={styles["overlay"]}>
+                    <div className={styles["content"]}>
+                        <ModalSkeleton />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>

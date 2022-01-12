@@ -6,6 +6,7 @@ import Breadcumb from "../../component/Breadcumb/Breadcumb";
 import FormCreateTask from "../../component/Forms/FormCreateTask";
 import { getProjectDetailAction } from "../../redux/actions/ProjectActions";
 import { DISPLAY_DRAWER, SET_COMPONENT } from "../../redux/types/DrawerType";
+import { DISPLAY_LOADING } from "../../redux/types/LoadingType";
 import { DISPLAY_MODAL } from "../../redux/types/ModalType";
 import styles from "./ProjectDetail.module.css";
 
@@ -14,6 +15,7 @@ export default function ProjectDetail() {
     const { projectDetail } = useSelector((state) => state.ProjectReducer);
     const dispatch = useDispatch();
     useEffect(() => {
+        dispatch({type: DISPLAY_LOADING});
         dispatch(getProjectDetailAction(projectId));
     }, [projectId]);
 
