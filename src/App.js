@@ -11,11 +11,13 @@ import ProjectDetail from './page/ProjectDetail/ProjectDetail';
 import ModalTask from './component/Modals/ModalTask/ModalTask';
 import Loading from './component/Loading/Loading';
 import PageTest from './page/PageTest/PageTest';
+import ToastList from './component/Toast/ToastList';
 
 function App() {
   return (
     <BrowserRouter>
       <Loading />
+      <ToastList />
       <DrawerHOC />
       <ModalTask />
       <Routes>

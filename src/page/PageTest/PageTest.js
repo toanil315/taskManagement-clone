@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Toast from "../../component/Toast/Toast";
+import ToastList from "../../component/Toast/ToastList";
 
 const data = {
     inProgress: [
@@ -129,6 +131,7 @@ export default function PageTest() {
                     }}
                 </Droppable>
             </div>
+            <ToastList />
         </DragDropContext>
     );
 }

@@ -2,6 +2,7 @@ import { projectServices } from "../../services/ProjectServices";
 import { HIDE_DRAWER } from "../types/DrawerType";
 import { DISPLAY_LOADING, HIDE_LOADING } from "../types/LoadingType";
 import { SET_LIST_PROJECT, SET_PROJECT_CATEGORY, SET_PROJECT_DETAIL } from "../types/ProjectType";
+import { SHOW_TOAST } from "../types/ToastType";
 
 export const getAllProjectAction = () => {
     return async (dispatch) => {
@@ -47,11 +48,29 @@ export const createProjectAction = (model) => {
         try {
             const {data, status} = await projectServices.createProject(model);
             if(status === 200) {
+                dispatch({
+                    type: SHOW_TOAST,
+                    toast: {
+                        id: Date.now(),
+                        type: "success",
+                        title: "Yay! Everything worked.",
+                        description: "Create project successfull!"
+                    }
+                })
                 return true;
             }
         }
         catch(error) {
             console.log("error: ", {...error});
+            dispatch({
+                type: SHOW_TOAST,
+                toast: {
+                    id: Date.now(),
+                    type: "error",
+                    title: "Opps! Something went wrong.",
+                    description: "Sorry! There were a problem with your request."
+                }
+            })
             return false;
         }
     }
@@ -62,11 +81,29 @@ export const deleteProjectAction = (projectId) => {
         try {
             const {data, status} = await projectServices.deleteProject(projectId);
             if(status === 200) {
+                dispatch({
+                    type: SHOW_TOAST,
+                    toast: {
+                        id: Date.now(),
+                        type: "success",
+                        title: "Yay! Everything worked.",
+                        description: "Delete project successfull!"
+                    }
+                })
                 return true;
             }
         }
         catch(error){
             console.log("error: ", {...error});
+            dispatch({
+                type: SHOW_TOAST,
+                toast: {
+                    id: Date.now(),
+                    type: "error",
+                    title: "Opps! Something went wrong.",
+                    description: "Sorry! There were a problem with your request."
+                }
+            })
             return false;
         }
     }
@@ -77,11 +114,29 @@ export const assignUserToProjectAction = (model) => {
         try {
             const {data, status} = await projectServices.assignUserToProject(model);
             if(status === 200) {
+                dispatch({
+                    type: SHOW_TOAST,
+                    toast: {
+                        id: Date.now(),
+                        type: "success",
+                        title: "Yay! Everything worked.",
+                        description: "Assign member to project successfull!"
+                    }
+                })
                 return true;
             }
         }
         catch(error) {
             console.log("error: ", {...error});
+            dispatch({
+                type: SHOW_TOAST,
+                toast: {
+                    id: Date.now(),
+                    type: "error",
+                    title: "Opps! Something went wrong.",
+                    description: "Sorry! There were a problem with your request."
+                }
+            })
             return false;
         }
     }
@@ -133,11 +188,28 @@ export const createTaskAction = (modelTask, projectId) => {
                 dispatch({
                     type: HIDE_DRAWER
                 })
-                
+                dispatch({
+                    type: SHOW_TOAST,
+                    toast: {
+                        id: Date.now(),
+                        type: "success",
+                        title: "Yay! Everything worked.",
+                        description: "Create task successfull!"
+                    }
+                })
             }
         }
         catch(error) {
             console.log("error: ", {...error});
+            dispatch({
+                type: SHOW_TOAST,
+                toast: {
+                    id: Date.now(),
+                    type: "error",
+                    title: "Opps! Something went wrong.",
+                    description: "Sorry! There were a problem with your request."
+                }
+            })
             return false;
         }
     }
