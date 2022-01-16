@@ -10,6 +10,7 @@ import DrawerHOC from './component/Drawer/DrawerHOC';
 import ProjectDetail from './page/ProjectDetail/ProjectDetail';
 import ModalTask from './component/Modals/ModalTask/ModalTask';
 import Loading from './component/Loading/Loading';
+import PageTest from './page/PageTest/PageTest';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:projectId" element={<ProjectDetail />} />
           <Route path="createProject" element={<CreateProject />} />
+          <Route path="test" element={<PageTest />} />
         </Route>
         <Route path="login" element={<FormLayout />}>
           <Route index element={<Login />} />

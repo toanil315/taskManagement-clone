@@ -68,6 +68,7 @@ export default function ModalTask() {
                     status: responseStatus.data.content,
                     priorities: responsePriority.data.content,
                     members: responseMembers.data.content,
+                    
                 });
                 setTaskDetail(responseTask.data.content);
                 setComments(responseComment.data.content);
@@ -252,19 +253,21 @@ export default function ModalTask() {
     };
 
     useEffect(() => {
-        if (debounceRef.current !== null) {
-            clearTimeout(debounceRef.current);
+        if(taskDetail.taskName) {
+            if (debounceRef.current !== null) {
+                clearTimeout(debounceRef.current);
+            }
+            debounceRef.current = setTimeout(() => {
+                console.log("debounce");
+                //Change format from { assigness: [{id1}, {id2}...]} to { listUserAsign: [id1, id2,...]} for correct format in API
+                let modelTask = { ...taskDetail };
+                modelTask.listUserAsign = taskDetail.assigness?.map(({ id }) => {
+                    return id;
+                });
+                delete modelTask.assigness;
+                dispatch(updateTaskAction(modelTask));
+            }, 700);
         }
-        debounceRef.current = setTimeout(() => {
-            console.log("debounce");
-            //Change format from { assigness: [{id1}, {id2}...]} to { listUserAsign: [id1, id2,...]} for correct format in API
-            let modelTask = { ...taskDetail };
-            modelTask.listUserAsign = taskDetail.assigness.map(({ id }) => {
-                return id;
-            });
-            delete modelTask.assigness;
-            dispatch(updateTaskAction(modelTask));
-        }, 700);
     }, [taskDetail]);
 
     const sendComment = async (modalComment) => {

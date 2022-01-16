@@ -1,10 +1,13 @@
 import { Tooltip } from "antd";
 import React, { useCallback, useEffect, useMemo } from "react";
+import { Draggable } from "react-beautiful-dnd";
+import { Droppable } from "react-beautiful-dnd";
+import { DragDropContext } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useParams } from "react-router-dom";
 import Breadcumb from "../../component/Breadcumb/Breadcumb";
 import FormCreateTask from "../../component/Forms/FormCreateTask";
-import { getProjectDetailAction } from "../../redux/actions/ProjectActions";
+import { getProjectDetailAction, updateTaskStatusAction } from "../../redux/actions/ProjectActions";
 import { DISPLAY_DRAWER, SET_COMPONENT } from "../../redux/types/DrawerType";
 import { DISPLAY_LOADING } from "../../redux/types/LoadingType";
 import { DISPLAY_MODAL } from "../../redux/types/ModalType";
@@ -15,7 +18,7 @@ export default function ProjectDetail() {
     const { projectDetail } = useSelector((state) => state.ProjectReducer);
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch({type: DISPLAY_LOADING});
+        dispatch({ type: DISPLAY_LOADING });
         dispatch(getProjectDetailAction(projectId));
     }, [projectId]);
 
@@ -25,18 +28,27 @@ export default function ProjectDetail() {
             payload: {
                 visible: true,
                 taskId,
-                projectId
-            }
-        })
-    }
+                projectId,
+            },
+        });
+    };
 
     const renderBoard = () => {
         return projectDetail?.lstTask?.map((listTask, index) => {
             return (
-                <ul key={index} className={styles["column"]}>
+                <div key={index} className={styles["column"]}>
                     <h3>{listTask.statusName}</h3>
-                    {renderTasks(listTask.lstTaskDeTail)}
-                </ul>
+                    <Droppable droppableId={listTask.statusId}>
+                        {(provided) => {
+                            return (
+                                <ul {...provided.droppableProps} ref={provided.innerRef}>
+                                    {renderTasks(listTask.lstTaskDeTail)}
+                                    {provided.placeholder}
+                                </ul>
+                            );
+                        }}
+                    </Droppable>
+                </div>
             );
         });
     };
@@ -46,40 +58,57 @@ export default function ProjectDetail() {
             const type = task.taskTypeDetail.taskType;
             const priority = task.priorityTask.priority;
             return (
-                <li onClick={() => {displayModalTask(task.taskId, task.projectId)}} key={index} className={styles["task"]}>
-                    <h4>{task.taskName}</h4>
-                    <div className={styles["info"]}>
-                        <span
-                            title={type}
-                            className={`${styles["type"]} ${type === "bug" ? styles[type] : ""}`}
-                        >
-                            {type === "bug" ? (
-                                <i className="fa fa-bug"></i>
-                            ) : (
-                                <i className="fas fa-check-square"></i>
-                            )}
-                        </span>
-                        <span
-                            title={`priority: ${priority}`}
-                            className={`${styles["priority"]} ${styles[priority]}`}
-                        >
-                            {priority.includes("Low") ? (
-                                <i className="fa fa-arrow-down"></i>
-                            ) : (
-                                <i className="fa fa-arrow-up"></i>
-                            )}
-                        </span>
-                        <ul className={styles["assigness"]}>
-                            {task.assigness.map((mem, index) => {
-                                return (
-                                    <li key={index}>
-                                        <img src={mem.avatar} alt="assigness" />
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </div>
-                </li>
+                <Draggable key={task.taskId} draggableId={task.taskId.toString()} index={index}>
+                    {(provided) => {
+                        return (
+                            <li
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                ref={provided.innerRef}
+                                onClick={() => {
+                                    displayModalTask(task.taskId, task.projectId);
+                                }}
+                                className={styles["task"]}
+                                // style={{...}}
+                            >
+                                <h4>{task.taskName}</h4>
+                                <div className={styles["info"]}>
+                                    <span
+                                        title={type}
+                                        className={`${styles["type"]} ${
+                                            type === "bug" ? styles[type] : ""
+                                        }`}
+                                    >
+                                        {type === "bug" ? (
+                                            <i className="fa fa-bug"></i>
+                                        ) : (
+                                            <i className="fas fa-check-square"></i>
+                                        )}
+                                    </span>
+                                    <span
+                                        title={`priority: ${priority}`}
+                                        className={`${styles["priority"]} ${styles[priority]}`}
+                                    >
+                                        {priority.includes("Low") ? (
+                                            <i className="fa fa-arrow-down"></i>
+                                        ) : (
+                                            <i className="fa fa-arrow-up"></i>
+                                        )}
+                                    </span>
+                                    <ul className={styles["assigness"]}>
+                                        {task.assigness.map((mem, index) => {
+                                            return (
+                                                <li key={index}>
+                                                    <img src={mem.avatar} alt="assigness" />
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            </li>
+                        );
+                    }}
+                </Draggable>
             );
         });
     };
@@ -96,6 +125,48 @@ export default function ProjectDetail() {
                 </li>
             );
         });
+    };
+
+    const onDragEnd = ({ destination, source, draggableId }) => {
+        console.log({ destination, source, draggableId });
+        if (source.droppableId !== destination.droppableId) {
+            let projectDetailClone = { ...projectDetail };
+            // find index of list source and list destination
+            let indexOfListSource = projectDetailClone.lstTask.findIndex(
+                (listTask) => listTask.statusId === source.droppableId
+            );
+            let indexOfListDestination = projectDetailClone.lstTask.findIndex(
+                (listTask) => listTask.statusId === destination.droppableId
+            );
+            console.log(indexOfListSource, indexOfListDestination);
+            // remove task in list source and put it into list destination
+            //format of projectDetail:
+            // projectDetail: {
+            //     lstTask: [
+            //         {
+            //             lstTaskDetail: {
+            //                 {
+            //                     taskId: 0
+            //                 }
+            //             }
+            //             statusId: "1"
+            //         }
+            //     ]
+            // }
+            const [taskRemoved] = projectDetailClone.lstTask[
+                indexOfListSource
+            ].lstTaskDeTail.splice(source.index, 1);
+            projectDetailClone.lstTask[indexOfListDestination].lstTaskDeTail.push(taskRemoved);
+            dispatch(
+                updateTaskStatusAction(
+                    {
+                        taskId: Number(draggableId),
+                        statusId: destination.droppableId,
+                    },
+                    projectDetailClone.id
+                )
+            );
+        }
     };
 
     return (
@@ -128,7 +199,9 @@ export default function ProjectDetail() {
                     Add New Task
                 </button>
             </div>
-            <div className={styles["table"]}>{renderBoard()}</div>
+            <DragDropContext onDragEnd={onDragEnd}>
+                <div className={styles["table"]}>{renderBoard()}</div>
+            </DragDropContext>
         </div>
     );
 }

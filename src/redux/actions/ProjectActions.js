@@ -156,3 +156,17 @@ export const updateTaskAction = (modelTask) => {
         }
     }
 }
+
+export const updateTaskStatusAction = (model, projectId) => {
+    return async (dispatch) => {
+        try {
+            const {data, status} = await projectServices.updateTaskStatus(model);
+            if(status === 200) {
+                // dispatch(getProjectDetailAction(projectId));
+            }
+        }
+        catch(error) {
+            console.log("error: ", {...error});
+        }
+    }
+}

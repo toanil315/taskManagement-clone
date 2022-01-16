@@ -62,6 +62,10 @@ class ProjectServices extends BaseServices {
         return this.post(`${Domain}/Project/updateTask`, modelTask);
     }
 
+    updateTaskStatus = (model) => {
+        return this.put(`${Domain}/Project/updateStatus`, model);
+    }
+
     deleteTask = (taskId) => {
         return this.delete(`${Domain}/Project/removeTask?taskId=${taskId}`);
     }
