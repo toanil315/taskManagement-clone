@@ -1,6 +1,7 @@
-import React, { Fragment } from 'react'
-import { Outlet } from 'react-router-dom';
+import React, { Fragment, useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from '../../component/Sidebar/Sidebar';
+import { TOKEN } from '../../util/constant';
 import './PublicLayout.css';
 
 export default function PublicLayout() {

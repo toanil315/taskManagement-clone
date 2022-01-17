@@ -23,7 +23,7 @@ export default function Login() {
         onSubmit: async (values) => {
             console.log(values);
             let isSuccess = await dispatch(loginAction(values));
-            if(isSuccess) navigate("/projects");
+            if(isSuccess) navigate("/");
             else {
                 formik.setFieldError('email', ' ');
                 formik.setFieldError('password', '*Email or Password is invalid!');
