@@ -8,6 +8,8 @@ import { useDispatch } from "react-redux";
 import { projectServices } from "../../services/ProjectServices";
 import * as Yup from "yup";
 import { createTaskAction } from "../../redux/actions/ProjectActions";
+import { SHOW_TOAST } from "../../redux/types/ToastType";
+import { HIDE_DRAWER } from "../../redux/types/DrawerType";
 
 const { Option } = Select;
 
@@ -33,6 +35,20 @@ export default function FormCreateTask({ projectId }) {
                 priorities: responsePriority.data.content,
                 members: responseMembers.data.content,
             });
+        })
+        .catch((error) => {
+            dispatch({
+                type: HIDE_DRAWER
+            })
+            dispatch({
+                type: SHOW_TOAST,
+                toast: {
+                    id: Date.now(),
+                    type: "error",
+                    title: "Opps! Something went wrong.",
+                    description: "You should add member into project before create task!"
+                }
+            })
         });
     };
 
