@@ -6,6 +6,10 @@ class UserServices extends BaseServices {
         return this.postWithoutHeader(`${Domain}/Users/signin`, data);
     }
 
+    signup = (data) => {
+        return this.postWithoutHeader(`${Domain}/Users/signup`, data);
+    }
+
     getListUser = (name) => {
         if(name) {
             return this.get(`${Domain}/Users/getUser?keyword=${name}`);

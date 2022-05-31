@@ -40,6 +40,7 @@ export const getProjectCategoryAction = () => {
         catch(error) {
             console.log("error: ", {...error});
         }
+        
     }
 }
 

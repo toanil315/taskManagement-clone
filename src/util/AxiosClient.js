@@ -8,6 +8,7 @@ axiosClient.interceptors.response.use(function (response) {
     // Do something with response data
     return response;
   }, function (error) {
+    console.log("error")
     if (error.response.status === 401) {
         console.log(error.response.status);
         console.log("error");

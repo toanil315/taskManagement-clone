@@ -11,6 +11,7 @@ import { getProjectDetailAction, updateTaskStatusAction } from "../../redux/acti
 import { DISPLAY_DRAWER, SET_COMPONENT } from "../../redux/types/DrawerType";
 import { DISPLAY_LOADING } from "../../redux/types/LoadingType";
 import { DISPLAY_MODAL } from "../../redux/types/ModalType";
+import { SHOW_TOAST } from "../../redux/types/ToastType";
 import styles from "./ProjectDetail.module.css";
 
 export default function ProjectDetail() {
@@ -127,6 +128,32 @@ export default function ProjectDetail() {
         });
     };
 
+    const handleClickAddTask = () => {
+        if (projectDetail?.members.length > 0) {
+            dispatch({
+                type: SET_COMPONENT,
+                payload: {
+                    component: <FormCreateTask projectId={projectId} />,
+                    title: "Create Task",
+                },
+            });
+            dispatch({
+                type: DISPLAY_DRAWER,
+            });
+        }
+        else {
+            dispatch({
+                type: SHOW_TOAST,
+                toast: {
+                    id: Date.now(),
+                    type: "error",
+                    title: "Opps! Something went wrong.",
+                    description: "You should add member into project before create task!"
+                }
+            })
+        }
+    };
+
     const onDragEnd = ({ destination, source, draggableId }) => {
         console.log({ destination, source, draggableId });
         if (source.droppableId !== destination.droppableId) {
@@ -181,21 +208,7 @@ export default function ProjectDetail() {
                     <input id="search" name="search" />
                 </span>
                 <ul className={styles["members"]}>{renderMembers()}</ul>
-                <button
-                    onClick={() => {
-                        dispatch({
-                            type: SET_COMPONENT,
-                            payload: {
-                                component: <FormCreateTask projectId={projectId} />,
-                                title: "Create Task",
-                            },
-                        });
-                        dispatch({
-                            type: DISPLAY_DRAWER,
-                        });
-                    }}
-                    className={styles["button"]}
-                >
+                <button onClick={handleClickAddTask} className={styles["button"]}>
                     Add New Task
                 </button>
             </div>

@@ -40,15 +40,6 @@ export default function FormCreateTask({ projectId }) {
             dispatch({
                 type: HIDE_DRAWER
             })
-            dispatch({
-                type: SHOW_TOAST,
-                toast: {
-                    id: Date.now(),
-                    type: "error",
-                    title: "Opps! Something went wrong.",
-                    description: "You should add member into project before create task!"
-                }
-            })
         });
     };
 
@@ -89,9 +80,9 @@ export default function FormCreateTask({ projectId }) {
             description: Yup.string().required("*Description is Required!"),
             originalEstimate: Yup.number().min(1, "*Original Estimate is invalid!"),
         }),
-        onSubmit: (values) => {
+        onSubmit: (values, actions) => {
             dispatch(createTaskAction(values, projectId));
-            clearForm();
+            actions.resetForm();
         },
     });
 

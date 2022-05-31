@@ -23,6 +23,21 @@ export const loginAction = (model) => {
     }
 }
 
+export const signupAction = (model) => {
+    return async (dispatch) => {
+        try {
+            const {data, status} = await userServices.signup(model);
+            if(status === 200) {
+                return true;
+            }
+        }
+        catch(error) {
+            console.log("error: ", {...error});
+            return false;
+        }
+    }
+}
+
 export const getListUserAction = (name) => {
     return async(dispatch) => {
         try {

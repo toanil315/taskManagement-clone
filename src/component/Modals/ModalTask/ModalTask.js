@@ -68,7 +68,6 @@ export default function ModalTask() {
                     status: responseStatus.data.content,
                     priorities: responsePriority.data.content,
                     members: responseMembers.data.content,
-                    
                 });
                 setTaskDetail(responseTask.data.content);
                 setComments(responseComment.data.content);
@@ -84,6 +83,7 @@ export default function ModalTask() {
         setLoadingSkeleton(true);
         if (taskId !== "" && projectId !== "") {
             getInfos();
+            setShowEditor(false);
         }
     }, [taskId, projectId]);
 
@@ -253,7 +253,7 @@ export default function ModalTask() {
     };
 
     useEffect(() => {
-        if(taskDetail.taskName) {
+        if (taskDetail.taskName) {
             if (debounceRef.current !== null) {
                 clearTimeout(debounceRef.current);
             }
@@ -429,14 +429,13 @@ export default function ModalTask() {
                                             </button>
                                         </div>
                                     ) : (
-                                        <div style={{ minHeight: 300 }}>
-                                            <div
-                                                onClick={() => {
-                                                    setShowEditor(true);
-                                                }}
-                                            >
-                                                {parse(taskDetail.description || "")}
-                                            </div>
+                                        <div
+                                            onClick={() => {
+                                                setShowEditor(true);
+                                            }}
+                                            style={{ minHeight: 300 }}
+                                        >
+                                            <div>{parse(taskDetail.description || "")}</div>
                                         </div>
                                     )}
                                 </div>

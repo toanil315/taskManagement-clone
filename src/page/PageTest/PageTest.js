@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Toast from "../../component/Toast/Toast";
 import ToastList from "../../component/Toast/ToastList";
+import { Editor } from "@tinymce/tinymce-react";
+import { editorkey } from "../../util/constant";
+import parse from "html-react-parser";
+import { useRef } from "react";
 
 const data = {
     inProgress: [
@@ -15,6 +19,26 @@ const data = {
 
 export default function PageTest() {
     const [todos, setTodos] = useState(data);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [editorContent, setEditorContent] = useState(`
+        <p>This is the initial content of the editor.</p>
+        <img src="https://tranhtreotuonghanoi.com/wp-content/uploads/2020/03/top-tranh-ve-phong-canh-cua-hoc-sinh-dep-nhat.jpg" alt="text-img" />
+    `);
+    const fileUploadRef = useRef(null);
+
+    useEffect(() => {
+        if (previewUrl) {
+            setEditorContent(
+                (preEditorContent) =>
+                    preEditorContent +
+                    `${
+                        previewUrl
+                            ? `<p><img src="${previewUrl}" alt="text-img" /></p>`
+                            : ""
+                    }`
+            );
+        }
+    }, [previewUrl]);
 
     const renderTodosInProgress = () => {
         return todos.inProgress?.map((todo, indexTodo) => {
@@ -27,7 +51,7 @@ export default function PageTest() {
                                 {...provided.dragHandleProps}
                                 ref={provided.innerRef}
                                 style={{
-                                    background: 'white',
+                                    background: "white",
                                     padding: 10,
                                     borderRadius: 5,
                                     marginBottom: 10,
@@ -90,7 +114,18 @@ export default function PageTest() {
 
         const clone = reorder(todos.inProgress, result.source.index, result.destination.index);
 
-        setTodos({ ...todos, inProgress: [...clone]});
+        setTodos({ ...todos, inProgress: [...clone] });
+    };
+
+    const handleEditorChange = (value) => {
+        console.log("value of editor: ", value);
+        setEditorContent(value);
+    };
+
+    const handleFileUpload = (files) => {
+        console.log(files[0]);
+        const imageUrl = URL.createObjectURL(files[0]);
+        setPreviewUrl(imageUrl);
     };
 
     return (
@@ -116,22 +151,64 @@ export default function PageTest() {
                 </Droppable>
                 <Droppable droppableId="done">
                     {(provided) => {
-                        return <div
-                            style={{
-                                width: "calc(50% - 10px)",
-                                padding: 10,
-                                backgroundColor: "#dedede",
-                            }}
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                        >
-                            {renderTodosDone()}
-                            {provided.placeholder}
-                        </div>;
+                        return (
+                            <div
+                                style={{
+                                    width: "calc(50% - 10px)",
+                                    padding: 10,
+                                    backgroundColor: "#dedede",
+                                }}
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                            >
+                                {renderTodosDone()}
+                                {provided.placeholder}
+                            </div>
+                        );
                     }}
                 </Droppable>
             </div>
             <ToastList />
+
+            <Editor
+                value={editorContent}
+                name="description"
+                onEditorChange={handleEditorChange}
+                apiKey={editorkey}
+                init={{
+                    height: 180,
+                    menubar: false,
+                    plugins: [
+                        "advlist autolink lists link image charmap print preview anchor",
+                        "searchreplace visualblocks code fullscreen",
+                        "insertdatetime media table paste code help wordcount",
+                    ],
+                    toolbar:
+                        "undo redo | formatselect | " +
+                        "bold italic backcolor | alignleft aligncenter " +
+                        "alignright alignjustify | bullist numlist outdent indent | " +
+                        "removeformat | help | myCustomToolbarButton",
+                    content_style:
+                        "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                    setup: (editor) => {
+                        editor.ui.registry.addButton("myCustomToolbarButton", {
+                            icon: "image",
+                            onAction: () => {
+                                fileUploadRef.current.click();
+                            },
+                        });
+                    },
+                }}
+            />
+            {<div style={{maxWidth: '60vw'}}>{parse(editorContent)}</div>}
+            <input
+                onChange={(event) => {
+                    handleFileUpload(event.target.files);
+                }}
+                style={{ display: "none" }}
+                type="file"
+                ref={fileUploadRef}
+            />
         </DragDropContext>
     );
 }

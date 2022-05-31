@@ -65,7 +65,8 @@ export default function Login() {
                     value={formik.values.password} 
                     size="large" 
                     placeholder=" Password"
-                    prefix={<UserOutlined />} />
+                    prefix={<LockOutlined />}
+                    type="password" />
                 <p className={styles['error']}>
                     {formik.touched.password && formik.errors.password 
                     ? formik.errors.password
